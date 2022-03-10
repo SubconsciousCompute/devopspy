@@ -32,7 +32,7 @@ jobs:
         # stop the build if there are Python syntax errors or undefined names
         poetry install
         poetry run mypy subcom
-        poetry run pylint -E .
+        poetry run pylint -E subcom
        
     - name: Test with pytest
       run: |

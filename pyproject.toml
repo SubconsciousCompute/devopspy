@@ -9,6 +9,7 @@ license = "AGPL"
 python = "^3.8"
 requests = "^2.27.1"
 loguru = "^0.6.0"
+meta-package-manager = "^4.9.10"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.1"

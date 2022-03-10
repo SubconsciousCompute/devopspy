@@ -9,14 +9,14 @@ import subprocess
 import shutil
 import itertools
 import functools
-
 import typing as T
 
 from pathlib import Path
+
 from loguru import logger
 
 
-def find_executable(
+def find(
     cmd: str,
     *,
     hints: list[T.Union[str, Path]] = [],
@@ -67,3 +67,16 @@ def find_executable(
                 if fs:
                     return fs[0]
     return None
+
+
+# alias
+find_executable = find
+
+
+def cmake() -> Path:
+    """get cmake path"""
+    cmake = find("cmake")
+    if cmake is None or not cmake.is_file():
+        logger.warning("cmake.exe is not found")
+        raise Exception("cmake not found")
+    return cmake

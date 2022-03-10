@@ -24,9 +24,9 @@ jobs:
 
     - name: Install dependencies
       run: |
-        apt install cmake -yy
+        sudo apt update && sudo apt install cmake git -yy
         python -m pip install --upgrade pip
-        python -m pip install poetry
+        python -m pip install --upgrade poetry
 
     - name: Lint
       run: |

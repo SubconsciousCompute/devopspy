@@ -38,3 +38,7 @@ jobs:
       run: |
         poetry install 
         poetry run pytest 
+
+    - name: Build and Deploy
+      run: |
+        poetry build

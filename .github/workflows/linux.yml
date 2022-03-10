@@ -1,0 +1,45 @@
+name: Python package (Linux)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10"]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        apt install cmake -yy
+        python -m pip install --upgrade pip
+        python -m pip install poetry
+
+    - name: Lint
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        poetry install
+        poetry run mypy subcom
+        poetry run pylint -E subcom
+
+    - name: Test with pytest
+      run: |
+        poetry install
+        poetry run pytest -s tests/
+
+    - name: Build and Deploy
+      run: |
+        poetry build

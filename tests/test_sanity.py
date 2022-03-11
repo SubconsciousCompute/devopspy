@@ -15,11 +15,6 @@ import subcom
 from subcom.command import find_executable
 
 
-def test_sanity():
-    a = subcom.DevOps()
-    assert a
-
-
 def test_find_executable():
     """This may pass on developer machine."""
     cmake = find_executable("cmake")

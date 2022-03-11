@@ -35,19 +35,19 @@ def find(
 
     Returns
     -------
-
     Path of the executable if found, `None` otherwise.
-
     """
 
+    # On windows, append .exe to cmd.
     winname = f"{cmd}.exe" if not cmd.endswith(".exe") else cmd
 
-    # We full path is given, return it.
+    # If the full path is given, nothing to search. Return it.
     for cmd in (cmd, winname):
         if p := Path(cmd):
             if p.exists():
                 return p
 
+    # Search in PATH using shutils.
     c = shutil.which(cmd)
     if c is not None:
         return Path(c)
@@ -56,15 +56,23 @@ def find(
     subdirs.append(".")
     for hint, subdir in itertools.product(hints, subdirs):
         e = Path(hint) / subdir
-        assert e.exists(), f"{str(e)} doesn't exists"
-        logger.debug(f" Searching in {str(e)}")
+        logger.debug(f" Searching for {cmd} in {str(e)}")
         if not e.exists():
+            logger.warning(f" Location '{str(e)}' doesn't exist. Ignoring...")
             continue
+
         if e.is_file() and (e.name == cmd or e.name == winname):
             return e
+
         if recursive and e.is_dir():
             if fs := list(e.glob(f"**/{cmd}")) + list(e.glob(f"**/{winname}")):
                 if fs:
+                    if len(fs) > 1:
+                        logger.warning(
+                            "Multiple binaries found with same name: \n\t"
+                            + "\n\t".join(map(str, fs))
+                            + ".\nReturning the first one."
+                        )
                     return fs[0]
     return None
 
@@ -80,3 +88,14 @@ def cmake() -> Path:
         logger.warning("cmake.exe is not found")
         raise Exception("cmake not found")
     return cmake
+
+
+def msbuild() -> Path:
+    """get cmake path"""
+    msbuild = find_executable(
+        "msbuild.exe",
+        hints=["C:/Program Files (x86)/Microsoft Visual Studio"],
+        recursive=True,
+    )
+    assert msbuild is not None and msbuild.exists(), f"Could not find msbuild.exe"
+    return Path(msbuild)

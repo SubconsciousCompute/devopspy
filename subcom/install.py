@@ -15,8 +15,9 @@ import subcom.command
 
 
 def _get_manager_opts() -> list[str]:
-    sys = platform.system()
-    if sys.startswith("win"):
+    if subcom.common.is_windows():
+        _choco = subcom.command.find("choco")
+        assert _choco is not None and _choco.exists()
         return ["-m", "choco"]
     return []
 
@@ -55,14 +56,30 @@ def ensure_pkg(pkgname: str, binpath: Path) -> Path:
     """Ensure that a given package name (with associated file) is available on the system"""
 
 
-def ensure_visual_studio(pkg: str = "visualstudio2022community"):
-    install_pkg(pkg)
+def ensure_visual_studio(
+    pkg: str = "visualstudio2019community", trial_left: int = 1
+) -> Path:
+    """Ensure that Visual Studio 2019 is installed and returns the path to msbuid.exe"""
+    msbuild = subcom.command.find(
+        "msbuild.exe",
+        hints=["C:/Program Files (x86)/Microsoft Visual Studio"],
+        recursive=True,
+    )
+
+    if msbuild is None and trial_left > 0:
+        logger.info(f"Trying to install {pkg} {trial_left=}")
+        install_pkg(pkg)
+        ensure_visual_studio(trial_left=trial_left - 1)
+
+    assert msbuild is not None and msbuild.exists()
+    return Path(msbuild)
 
 
 def ensure_cmake() -> Path:
     """Ensure that cmake is installed"""
-    if _x := subcom.command.find("cmake"):
-        return Path(_x)
+    _cmake = subcom.command.find("cmake")
+    if _cmake is not None and _cmake.exists():
+        return Path(_cmake)
 
     extra = []
     if subcom.common.is_windows():

@@ -23,16 +23,20 @@ def test_find_executable():
     py = find_executable("python")
     assert py is not None and py.exists()
 
-    msbuild = find_executable("msbuilddumdum")
-    assert msbuild is None
+    dummy = find_executable("msbuilddumdum")
+    assert dummy is None
 
 
 def test_msbuild():
-    if not sys.platform.startswith("win"):
+    if not subcom.common.is_windows():
+        logger.warning(f"Not windows {sys.platform=}")
         pytest.skip("Windows only test", allow_module_level=True)
+
+    logger.debug("test_msbuild")
+    subcom.install.ensure_visual_studio()
 
     msbuild = find_executable(
         "msbuild.exe", hints=["C:/Program Files (x86)"], recursive=True
     )
     logger.info(f" msbuild = {msbuild=}")
-    assert msbuild.exists()
+    assert msbuild is not None and msbuild.exists()
